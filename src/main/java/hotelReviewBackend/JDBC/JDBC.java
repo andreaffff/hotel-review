@@ -1,21 +1,22 @@
 package hotelReviewBackend.JDBC;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class JDBC {
     private static JDBC instance = null;
-    private final String URL;
-    private final String USER;
-    private final String PASSWORD;
-    private final String DRIVER = "com.mysql.cj.jdbc.Driver";
+    private final String url;
+    private final String user;
+    private final String password;
 
     private JDBC() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
 
-            this.URL = "jdbc:mysql://localhost:3306/hoteladvisor";
-            this.USER = "root";
-            this.PASSWORD = "wPa06@3oeCq3";
+            this.url = "jdbc:mysql://localhost/hoteladvisior";
+            this.user = "root";
+            this.password = "alberello00";
 
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
@@ -32,10 +33,11 @@ public class JDBC {
     public Connection getConnection() {
         Connection connection;
         try {
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
         return connection;
     }
 

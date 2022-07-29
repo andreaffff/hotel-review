@@ -5,6 +5,7 @@ import hotelReviewBackend.Model.UserModel;
 
 import javax.ws.rs.*;
 
+@Path("/signin")
 public class UserRoutes {
     //Add user
     @POST
