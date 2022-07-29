@@ -14,7 +14,7 @@ public class JDBC {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            this.url = "jdbc:mysql://localhost/hoteladvisior";
+            this.url = "jdbc:mysql://localhost/hoteladvisor";
             this.user = "root";
             this.password = "alberello00";
 
