@@ -1,23 +1,21 @@
 package hotelReviewBackend.JDBC;
 
+import hotelReviewBackend.controller.UserController;
+import io.github.cdimascio.dotenv.Dotenv;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class JDBC {
     private static JDBC instance = null;
-    private final String url;
-    private final String user;
-    private final String password;
-
+    static Dotenv dotenv = Dotenv.configure().load();
+    private static final String URL  = dotenv.get("URL");//"jdbc:mysql://localhost/hoteladvisor";;
+    private static final String USER = dotenv.get("USER");//"root";
+    private static final String PASSWORD = dotenv.get("PASSWORD");//"wPa06@3oeCq3" ;
+    private static final String DRIVER = dotenv.get("DRIVER");//"com.mysql.cj.jdbc.Driver";
     private JDBC() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            this.url = "jdbc:mysql://localhost/hoteladvisor";
-            this.user = "root";
-            this.password = "alberello00";
-
+            Class.forName(DRIVER);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -33,11 +31,10 @@ public class JDBC {
     public Connection getConnection() {
         Connection connection;
         try {
-            connection = DriverManager.getConnection(url, user, password);
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return connection;
     }
 

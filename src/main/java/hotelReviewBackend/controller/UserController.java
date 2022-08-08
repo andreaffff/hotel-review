@@ -11,7 +11,7 @@ public class UserController {
     public static UserModel addUser(UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
 
-        String sql = "INSERT INTO users (username, name, surname,address,  password,phone,role) VALUES (?,?,?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (username, name, surname,address,  password,phone,role,email) VALUES (?,?,?,?,?,?,?,?)";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -22,6 +22,7 @@ public class UserController {
             preparedStatement.setString(5, user.getPassword());
             preparedStatement.setString(6, user.getPhone());
             preparedStatement.setString(7, user.getRole());
+            preparedStatement.setString(8,user.getEmail());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);

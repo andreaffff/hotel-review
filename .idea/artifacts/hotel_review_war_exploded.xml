@@ -88,6 +88,7 @@
           <element id="library" level="project" name="Maven: org.apache.camel:json-simple-ordered:2.20.1" />
           <element id="library" level="project" name="Maven: org.springframework.boot:spring-boot-configuration-processor:1.5.8.RELEASE" />
           <element id="library" level="project" name="Maven: com.vaadin.external.google:android-json:0.0.20131108.vaadin1" />
+          <element id="library" level="project" name="Maven: io.github.cdimascio:dotenv-java:2.2.4" />
         </element>
       </element>
       <element id="directory" name="META-INF">
