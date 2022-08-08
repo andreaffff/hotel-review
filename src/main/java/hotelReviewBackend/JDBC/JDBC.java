@@ -30,6 +30,7 @@ public class JDBC {
 
     public Connection getConnection() {
         Connection connection;
+        System.out.println("URL:"+URL);
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
         } catch (SQLException e) {

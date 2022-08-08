@@ -1,5 +1,7 @@
 package hotelReviewBackend.Model;
 
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
 public class UserModel {
     private String username;
     private String name;
@@ -15,6 +17,7 @@ public class UserModel {
     }
 
     public void setUsername(String username) {this.username = username;}
+
     public String getName() {
         return name;
     }
@@ -55,6 +58,8 @@ public class UserModel {
     }
 
     public String getPassword() {
+
+        //String hash = BCrypt.hashpw(password, BCrypt.gensalt(3));
         return password;
     }
 
@@ -62,9 +67,7 @@ public class UserModel {
         this.password = password;
     }
 
-    public String  getRole(){
-        return role;
-    }
+    public String getRole(){ return role; }
 
 
 }
