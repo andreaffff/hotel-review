@@ -1,9 +1,10 @@
-package hotelReviewBackend.controller;
+package hotelReviewBackend.Controller;
 
 import hotelReviewBackend.JDBC.JDBC;
 import hotelReviewBackend.Model.UserModel;
 
 import org.json.JSONObject;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import javax.ws.rs.core.Response;
 import java.sql.Connection;
@@ -55,4 +56,36 @@ public class UserController {
                 JDBC.closeConnection(connection);
                 return response;
             }
+    public static Response login(String username, String password){
+        JSONObject object ;
+        Response response = null;
+        ResultSet result;
+        String checkUser = "SELECT password from users WHERE username= ?";
+        try{
+            Connection connection = JDBC.getInstance().getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
+            preparedStatement.setString(1, username);
+            result = preparedStatement.executeQuery();
+            if(result !=null) {
+                if (BCrypt.checkpw(password, result.getString("password"))) {
+                    object = new JSONObject();
+                    object.put("Avviso", "Login riuscito");
+                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
+                } else {
+                    object = new JSONObject();
+                    object.put("Avviso", "Password errata");
+                    response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
+                }
+            }else{
+                object = new JSONObject();
+                object.put("Avviso", "Utente non registrato");
+                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return response;
+    }
         }

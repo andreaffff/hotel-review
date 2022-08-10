@@ -1,17 +1,26 @@
 package hotelReviewBackend.Routes;
 
-import hotelReviewBackend.controller.UserController;
+import hotelReviewBackend.Controller.UserController;
 import hotelReviewBackend.Model.UserModel;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-@Path("/signin")
+
 public class UserRoutes {
     //Add user
+    @Path("/signin")
     @POST
     @Produces("application/json")
     public Response addUser(UserModel user) {
         return UserController.addUser(user);
     }
+
+    @Path("/login")
+    @POST
+    @Produces("application/json")
+    public Response login(String username, String password) {
+        return UserController.login(username,password);
+    };
+
 }
