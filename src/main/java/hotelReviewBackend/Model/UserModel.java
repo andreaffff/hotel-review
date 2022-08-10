@@ -57,17 +57,21 @@ public class UserModel {
         this.address = address;
     }
 
-    public String getPassword() {
+    public String getPassword() {return password; }
 
-        //String hash = BCrypt.hashpw(password, BCrypt.gensalt(3));
-        return password;
+    public String getEncryptedPassword() {
+        String hash = BCrypt.hashpw(password, BCrypt.gensalt(10));
+        return hash;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    public String getRole(){ return role; }
+    public String getRole(){
+        if (role != "worker" && role != "admin")
+            role = "worker";
 
+        return role; }
 
 }
