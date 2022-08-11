@@ -22,7 +22,7 @@ public class UserController {
             role = "worker";
         else
             role = user.getRole();
-        String checkUser = "SELECT * from users WHERE username=" + user.getUsername();
+        String checkUser = "SELECT * from users WHERE username = " + user.getUsername();
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
             result = preparedStatement.executeQuery();
@@ -39,7 +39,7 @@ public class UserController {
             try {
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 System.out.println("hash=" + hash);
-                System.out.println("role=" + role);
+                 System.out.println("role=" + role);
                 preparedStatement.setString(1, user.getUsername());
                 preparedStatement.setString(2, user.getName());
                 preparedStatement.setString(3, user.getSurname());
@@ -52,8 +52,37 @@ public class UserController {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }else
-            System.out.println("Utente già registrato"); //Da inserire come risposta json
+       }else
+           System.out.println("Utente già registrato"); //Da inserire come risposta json
+
+        JDBC.closeConnection(connection);
+        return user;
+    }
+
+    public static UserModel getUserByUsername(String username){
+        Connection connection = JDBC.getInstance().getConnection();
+        UserModel user = new UserModel();
+
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            System.out.println(username);
+
+            while (resultSet.next()) {
+                user.setUsername(resultSet.getString("username"));
+                user.setName(resultSet.getString("name"));
+                user.setSurname(resultSet.getString("surname"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPhone(resultSet.getString("phone"));
+                user.setAddress(resultSet.getString("address"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(resultSet.getString("role"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         JDBC.closeConnection(connection);
         return user;

@@ -69,5 +69,8 @@ public class UserModel {
 
     public String getRole(){ return role; }
 
+    public void setRole(String password) {
+        this.role = role;
+    }
 
 }
