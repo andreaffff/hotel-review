@@ -1,7 +1,8 @@
-package hotelReviewBackend.Controller;
+package hotelReviewBackend.controller;
 
 import hotelReviewBackend.JDBC.JDBC;
 import hotelReviewBackend.Model.UserModel;
+import hotelReviewBackend.Model.LoginModel;
 
 import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -24,8 +25,8 @@ public class UserController {
             preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
 
-            if (!result.next() && result != null) {  //Se la ricerca non ha prodotto risultati
-                System.out.println("entra qui if if ");
+            if (!result.next()) {  //Se la ricerca non ha prodotto risultati
+                //Query inserimento utenti DB
                 String sql = "INSERT INTO users (username,name,surname,address,password,phone,role,email) VALUES (?,?,?,?,?,?,?,?)";
                 preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, user.getUsername());
@@ -56,18 +57,20 @@ public class UserController {
                 JDBC.closeConnection(connection);
                 return response;
             }
-    public static Response login(String username, String password){
+    public static Response login(LoginModel user){
         JSONObject object ;
         Response response = null;
         ResultSet result;
+        //Cerco la password tramite lo username
         String checkUser = "SELECT password from users WHERE username= ?";
         try{
             Connection connection = JDBC.getInstance().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
-            if(result !=null) {
-                if (BCrypt.checkpw(password, result.getString("password"))) {
+
+            if(result.next()) { //Se lo username è nel DB
+                if (BCrypt.checkpw(user.getPassword(), result.getString("password"))) {
                     object = new JSONObject();
                     object.put("Avviso", "Login riuscito");
                     response = Response.status(Response.Status.OK).entity(object.toString()).build();
@@ -76,12 +79,11 @@ public class UserController {
                     object.put("Avviso", "Password errata");
                     response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
                 }
-            }else{
+            }else{ //Se l'utente non è nel DB
                 object = new JSONObject();
-                object.put("Avviso", "Utente non registrato");
+                object.put("Avviso", "Username errato o non ancora registrato");
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
             }
-
         }catch(Exception e){
             e.printStackTrace();
         }
