@@ -59,12 +59,9 @@ public class UserModel {
 
     public String getPassword() {return password; }
 
-    public String getEncryptedPassword() {
-        String hash = BCrypt.hashpw(password, BCrypt.gensalt(10));
-        return hash;
-    }
-
     public void setPassword(String password) {
+        System.out.println(this.password);
+        System.out.println(password);
         this.password = password;
     }
 

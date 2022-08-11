@@ -25,19 +25,20 @@ public class UserController {
             PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
             preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
-
+            String hash = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(10));
             if (!result.next()) {  //Se la ricerca non ha prodotto risultati
                 //Query inserimento utenti DB
-                String sql = "INSERT INTO users (username,name,surname,address,password,phone,role,email) VALUES (?,?,?,?,?,?,?,?)";
+                String sql = "INSERT INTO users (username,name,surname,address,password ,phone,role,email) VALUES (?,?,?,?,?,?,?,?)";
                 preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, user.getUsername());
                 preparedStatement.setString(2, user.getName());
                 preparedStatement.setString(3, user.getSurname());
                 preparedStatement.setString(4, user.getAddress());
-                preparedStatement.setString(5, user.getEncryptedPassword());
+                preparedStatement.setString(5, hash);
                 preparedStatement.setString(6, user.getPhone());
                 preparedStatement.setString(7, user.getRole());
                 preparedStatement.setString(8, user.getEmail());
+                System.out.println("CIAOaaaa");
                 preparedStatement.executeUpdate(); //aggiungi il nuovo utente nel DB
                 object = new JSONObject();
                 object.put("Avviso", "Utente registrato correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
@@ -112,6 +113,7 @@ public class UserController {
                 user.setAddress(resultSet.getString("address"));
                 user.setPassword(resultSet.getString("password"));
                 user.setRole(resultSet.getString("role"));
+                System.out.println(user.getPassword());
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
