@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UserController {
     public static Response addUser(UserModel user) {
@@ -90,4 +91,33 @@ public class UserController {
 
         return response;
     }
+
+    public static UserModel getUserByUsername(String username){
+        Connection connection = JDBC.getInstance().getConnection();
+        UserModel user = new UserModel();
+
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            System.out.println(username);
+
+            while (resultSet.next()) {
+                user.setUsername(resultSet.getString("username"));
+                user.setName(resultSet.getString("name"));
+                user.setSurname(resultSet.getString("surname"));
+                user.setEmail(resultSet.getString("email"));
+                user.setPhone(resultSet.getString("phone"));
+                user.setAddress(resultSet.getString("address"));
+                user.setPassword(resultSet.getString("password"));
+                user.setRole(resultSet.getString("role"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
+
+        JDBC.closeConnection(connection);
+        return user;
+    }
+}

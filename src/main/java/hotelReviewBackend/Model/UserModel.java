@@ -73,5 +73,8 @@ public class UserModel {
             role = "worker";
 
         return role; }
+    public void setRole(String role){
+        this.role = role;
+    }
 
 }

@@ -6,7 +6,7 @@ import hotelReviewBackend.controller.UserController;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-@Path("/{username}")
+@Path("/login")
 public class Login {
 
     @POST
