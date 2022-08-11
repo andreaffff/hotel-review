@@ -1,7 +1,5 @@
 package hotelReviewBackend.Model;
 
-import org.springframework.security.crypto.bcrypt.BCrypt;
-
 public class UserModel {
     private String username;
     private String name;
