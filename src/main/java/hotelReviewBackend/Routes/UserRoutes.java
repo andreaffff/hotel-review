@@ -1,7 +1,7 @@
 package hotelReviewBackend.Routes;
 
+import hotelReviewBackend.Controller.UserController;
 import hotelReviewBackend.Model.LoginModel;
-import hotelReviewBackend.controller.UserController;
 import hotelReviewBackend.Model.UserModel;
 
 import javax.ws.rs.*;

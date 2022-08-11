@@ -1,4 +1,4 @@
-package hotelReviewBackend.controller;
+package hotelReviewBackend.Controller;
 
 import hotelReviewBackend.JDBC.JDBC;
 import hotelReviewBackend.Model.UserModel;
@@ -26,6 +26,7 @@ public class UserController {
             preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
             String hash = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(10));
+
             if (!result.next()) {  //Se la ricerca non ha prodotto risultati
                 //Query inserimento utenti DB
                 String sql = "INSERT INTO users (username,name,surname,address,password ,phone,role,email) VALUES (?,?,?,?,?,?,?,?)";
@@ -56,9 +57,9 @@ public class UserController {
         }catch(Exception e ){ //Dovrebbe prendere tutte le eccezioni
             e.printStackTrace();
         }
-                JDBC.closeConnection(connection);
-                return response;
-            }
+        JDBC.closeConnection(connection);
+        return response;
+    }
     public static Response login(LoginModel user){
         JSONObject object ;
         Response response = null;
