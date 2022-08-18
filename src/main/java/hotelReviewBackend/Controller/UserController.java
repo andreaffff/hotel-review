@@ -19,6 +19,8 @@ public class UserController {
     static JSONObject object;
     static ResultSet result = null;
 
+    //TODO delete,update user
+
     public static Response addUser(UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
         String checkUser = "SELECT * from users WHERE username= ?";

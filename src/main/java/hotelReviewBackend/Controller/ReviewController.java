@@ -17,6 +17,8 @@ public class ReviewController {
     static JSONObject object;
     static ResultSet result = null;
 
+    //TODO fare la delete di una recensione
+
     public static Response addReview(String username, ReviewModel review) {
         Connection connection = JDBC.getInstance().getConnection();
         //Verifica se l' utente ha già inserito una recensione per l'hotel
