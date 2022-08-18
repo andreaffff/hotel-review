@@ -5,6 +5,7 @@ import hotelReviewBackend.Model.ReviewModel;
 import hotelReviewBackend.Model.UserModel;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import javax.ws.rs.core.Response;
 import java.sql.Connection;
@@ -20,29 +21,44 @@ public class ReviewController {
     static ResultSet result = null;
     public static Response addReview(String username,ReviewModel review) {
         Connection connection = JDBC.getInstance().getConnection();
-        String insertReviewSql = "INSERT INTO reviews(title,text,hotel,valuation,upvote,downvote,users_username,cap) VALUES (?,?,?,?,?,?,?,?)";
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(insertReviewSql);
-            preparedStatement.setString(1, review.getTitle());
-            preparedStatement.setString(2, review.getText());
-            preparedStatement.setString(3, review.getHotel());
-            preparedStatement.setString(4, review.getValuation());
-            preparedStatement.setInt(5, 0); //La recensione appena inserita non ha voti
-            preparedStatement.setInt(6, 0);
-            preparedStatement.setString(7, username);
-            preparedStatement.setString(8,review.getCap());
-            preparedStatement.executeUpdate();
-            System.out.println("review title= "+ review.getTitle());
-            object = new JSONObject();
-            object.put("Avviso", "Recensione inserita correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
-            response = Response.status(Response.Status.OK).entity(object.toString()).build();
+        //Verifica se l' utente ha già inserito una recensione per l'hotel
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        String checkReviewSql = "SELECT * from reviews WHERE users_username = ? AND hotel = ? AND cap = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(checkReviewSql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, review.getHotel());
+            preparedStatement.setString(3, review.getCap());
+
+            result = preparedStatement.executeQuery();
+
+            if (!result.next()) {
+                String insertReviewSql = "INSERT INTO reviews(title,text,hotel,valuation,upvote,downvote,users_username,cap) VALUES (?,?,?,?,?,?,?,?)";
+                preparedStatement = connection.prepareStatement(insertReviewSql);
+                preparedStatement.setString(1, review.getTitle());
+                preparedStatement.setString(2, review.getText());
+                preparedStatement.setString(3, review.getHotel());
+                preparedStatement.setString(4, review.getValuation());
+                preparedStatement.setInt(5, 0); //La recensione appena inserita non ha voti
+                preparedStatement.setInt(6, 0);
+                preparedStatement.setString(7, username);
+                preparedStatement.setString(8, review.getCap());
+                preparedStatement.executeUpdate();
+                object = new JSONObject();
+                object.put("Avviso", "Recensione inserita correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            } else {
+                object = new JSONObject();
+                object.put("Avviso","Questo username ha già una recensione per questo hotel");
+                response = Response.status(Response.Status.CONFLICT).entity(object.toString()).build();
+            }
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            JDBC.closeConnection(connection);
+            return response;
         }
-        JDBC.closeConnection(connection);
-        return response;
-    }
     public static ReviewModel getReviewById(String id){
 
         Connection connection = JDBC.getInstance().getConnection();
@@ -53,9 +69,7 @@ public class ReviewController {
             PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
             preparedStatement.setString(1, id);
             ResultSet result = preparedStatement.executeQuery();
-            System.out.println(id);
-            while (result.next()) { //TODO come creare un messaggio di errore se il return deve essere un reviewModel
-                System.out.println(result.getString("title"));
+            while (result.next()) {
                 review.setTitle(result.getString("title"));
                 review.setText(result.getString("text"));
                 review.setHotel(result.getString("hotel"));
@@ -73,19 +87,49 @@ public class ReviewController {
 
         return review;
     }
-    public static List<ReviewModel> getAllReviews(){
+    public static List<ReviewModel> getAllReviewsByHotel(String hotel, String cap){
         Connection connection = JDBC.getInstance().getConnection();
         List<ReviewModel> reviews = new ArrayList<>();
 
-        String getOneSql = "SELECT * FROM reviews";
+        String getAllSql = "SELECT * FROM reviews WHERE (hotel=? AND cap = ?)";
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+            PreparedStatement preparedStatement = connection.prepareStatement(getAllSql);
+            preparedStatement.setString(1, hotel);
+            preparedStatement.setString(2, cap);
             ResultSet resultSet = preparedStatement.executeQuery();
-
 
             while (resultSet.next()) {
                 ReviewModel review = new ReviewModel();
-                System.out.println(resultSet.getString("title"));
+                review.setTitle(resultSet.getString("title"));
+                review.setText(resultSet.getString("text"));
+                review.setHotel(resultSet.getString("hotel"));
+                review.setValuation(resultSet.getString("valuation"));
+                review.setUpvote(resultSet.getInt("upvote"));
+                review.setDownvote(resultSet.getInt("downvote"));
+                review.setUsername(resultSet.getString("users_username"));
+                review.setCap(resultSet.getString("cap"));
+                reviews.add(review);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        JDBC.closeConnection(connection);
+
+        return reviews;
+    }
+    public static List<ReviewModel> getAllReviewsByUsername(String username){
+        Connection connection = JDBC.getInstance().getConnection();
+        List<ReviewModel> reviews = new ArrayList<>();
+
+        String getAllSql = "SELECT * FROM reviews WHERE (users_username = ?)";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(getAllSql);
+            preparedStatement.setString(1, username);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                ReviewModel review = new ReviewModel();
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
@@ -149,31 +193,30 @@ public class ReviewController {
         String updateDownVoteSql = "UPDATE reviews SET downvote= ? WHERE id = ?";
         if(typevote.equals("upvote")){
             try {
-                while(!result.next()){
+                if(result.next()) {
                     //Appena viene eseguita la prima query va avanti
+                    PreparedStatement preparedStatement = connection.prepareStatement(updateUpVoteSql);
+                    preparedStatement.setInt(1, result.getInt("upvote") + 1);
+                    preparedStatement.setString(2, id);
+                    preparedStatement.executeUpdate();
+                    object = new JSONObject();
+                    object.put("Avviso", "Upvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 }
-                PreparedStatement preparedStatement = connection.prepareStatement(updateUpVoteSql);
-                preparedStatement.setInt(1,result.getInt("upvote")+1);
-                preparedStatement.setString(2,id);
-                preparedStatement.executeUpdate();
-                object = new JSONObject();
-                object.put("Avviso", "Upvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
-                response = Response.status(Response.Status.OK).entity(object.toString()).build();
             }catch(Exception e){
                 e.printStackTrace();
             }
         }else if (typevote.equals("downvote")){
             try {
-                while(!result.next()){
-                    //Appena viene eseguita la prima query va avanti
+                if(result.next()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement(updateDownVoteSql);
+                    preparedStatement.setInt(1, result.getInt("downvote") + 1);
+                    preparedStatement.setString(2, id);
+                    preparedStatement.executeUpdate();
+                    object = new JSONObject();
+                    object.put("Avviso", "Downvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 }
-                PreparedStatement preparedStatement = connection.prepareStatement(updateDownVoteSql);
-                preparedStatement.setInt(1,result.getInt("downvote")+1);
-                preparedStatement.setString(2,id);
-                preparedStatement.executeUpdate();
-                object = new JSONObject();
-                object.put("Avviso", "Downvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
-                response = Response.status(Response.Status.OK).entity(object.toString()).build();
             }catch(Exception e){
                 e.printStackTrace();
             }
@@ -189,4 +232,5 @@ public class ReviewController {
         JDBC.closeConnection(connection);
         return response;
     }
+
 }
