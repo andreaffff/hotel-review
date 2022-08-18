@@ -2,7 +2,6 @@ package hotelReviewBackend.Routes;
 
 import hotelReviewBackend.Controller.UserController;
 import hotelReviewBackend.Model.LoginModel;
-import hotelReviewBackend.Model.ReviewModel;
 import hotelReviewBackend.Model.UserModel;
 
 import javax.ws.rs.*;
@@ -31,6 +30,7 @@ public class UserRoutes {
     public UserModel getUser(@QueryParam("username") String username) {
         return UserController.getUserByUsername(username);
     }
+
     @GET
     @Path("/all")
     @Produces("application/json")

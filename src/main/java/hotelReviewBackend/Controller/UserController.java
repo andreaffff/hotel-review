@@ -1,10 +1,8 @@
 package hotelReviewBackend.Controller;
 
 import hotelReviewBackend.JDBC.JDBC;
-import hotelReviewBackend.Model.ReviewModel;
-import hotelReviewBackend.Model.UserModel;
 import hotelReviewBackend.Model.LoginModel;
-
+import hotelReviewBackend.Model.UserModel;
 import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -57,22 +55,23 @@ public class UserController {
                         build();
             }
 
-        }catch(Exception e ){ //Dovrebbe prendere tutte le eccezioni
+        } catch (Exception e) { //Dovrebbe prendere tutte le eccezioni
             e.printStackTrace();
         }
         JDBC.closeConnection(connection);
         return response;
     }
-    public static Response login(LoginModel user){
+
+    public static Response login(LoginModel user) {
         //Cerco la password tramite lo username
         String checkUser = "SELECT password from users WHERE username= ?";
-        try{
+        try {
             Connection connection = JDBC.getInstance().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
             preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
 
-            if(result.next()) { //Se lo username è nel DB
+            if (result.next()) { //Se lo username è nel DB
                 if (BCrypt.checkpw(user.getPassword(), result.getString("password"))) {
                     object = new JSONObject();
                     object.put("Avviso", "Login riuscito");
@@ -82,18 +81,19 @@ public class UserController {
                     object.put("Avviso", "Password errata");
                     response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
                 }
-            }else{ //Se l'utente non è nel DB
+            } else { //Se l'utente non è nel DB
                 object = new JSONObject();
                 object.put("Avviso", "Username errato o non ancora registrato");
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return response;
     }
-    public static UserModel getUserByUsername(String username){
+
+    public static UserModel getUserByUsername(String username) {
         Connection connection = JDBC.getInstance().getConnection();
         UserModel user = new UserModel();
 
@@ -120,7 +120,8 @@ public class UserController {
         JDBC.closeConnection(connection);
         return user;
     }
-    public static List<UserModel> getAllUsers(){
+
+    public static List<UserModel> getAllUsers() {
         Connection connection = JDBC.getInstance().getConnection();
         List<UserModel> users = new ArrayList<>();
 
