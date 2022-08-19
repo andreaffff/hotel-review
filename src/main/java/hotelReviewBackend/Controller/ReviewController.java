@@ -17,7 +17,6 @@ public class ReviewController {
     static JSONObject object;
     static ResultSet result = null;
 
-    //TODO fare la delete di una recensione
 
     public static Response addReview(String username, ReviewModel review) {
         Connection connection = JDBC.getInstance().getConnection();
@@ -225,11 +224,11 @@ public class ReviewController {
                     preparedStatement.setString(2, id);
                     preparedStatement.executeUpdate();
                     object = new JSONObject();
-                    object.put("Avviso", "Downvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                    object.put("Avviso", "Downvote aggiornato");
                     response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 } else {
                     object = new JSONObject();
-                    object.put("Avviso", "Errore durante l'aggiornamento"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                    object.put("Avviso", "Errore durante l'aggiornamento");
                     response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
                 }
             } catch (Exception e) {
@@ -240,4 +239,28 @@ public class ReviewController {
         return response;
     }
 
+    public static Response deleteReviewById(String id){
+        Connection connection = JDBC.getInstance().getConnection();
+
+        String deleteOneSql =  "DELETE FROM reviews WHERE id = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(deleteOneSql);
+            preparedStatement.setString(1, id);
+            int rowsAffected = preparedStatement.executeUpdate();
+            object = new JSONObject();
+
+            if(rowsAffected>0) {
+                object.put("Avviso", "Recensione rimossa correttamente");
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            }else{
+                object.put("Avviso", "Non è stata trovata nessuna recensione con questo id");
+                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
+            }
+
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return response;
+
+    }
 }

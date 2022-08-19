@@ -48,5 +48,11 @@ public class ReviewRoutes {
         return ReviewController.updateUpvoteOrDownvote(id, typevote, review);
     }
 
+    @DELETE
+    @Produces("application/json")
+    public Response deleteReviewById(@QueryParam("id")String id){
+        return ReviewController.deleteReviewById(id);
+    }
+
 
 }
