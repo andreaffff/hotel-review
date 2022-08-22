@@ -14,7 +14,9 @@ public class UserModel {
         return username;
     }
 
-    public void setUsername(String username) {this.username = username;}
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getName() {
         return name;
@@ -32,13 +34,14 @@ public class UserModel {
         this.surname = surname;
     }
 
-   public String getEmail() {
+    public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
+
     public String getPhone() {
         return phone;
     }
@@ -55,7 +58,9 @@ public class UserModel {
         this.address = address;
     }
 
-    public String getPassword() {return password; }
+    public String getPassword() {
+        return password;
+    }
 
     public void setPassword(String password) {
         System.out.println(this.password);
@@ -63,12 +68,14 @@ public class UserModel {
         this.password = password;
     }
 
-    public String getRole(){
+    public String getRole() {
         if (role != "worker" && role != "admin")
             role = "worker";
 
-        return role; }
-    public void setRole(String role){
+        return role;
+    }
+
+    public void setRole(String role) {
         this.role = role;
     }
 
