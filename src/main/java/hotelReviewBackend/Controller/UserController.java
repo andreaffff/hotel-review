@@ -123,4 +123,85 @@ public class UserController {
         JDBC.closeConnection(connection);
         return user;
     }
+    //Credo che questa operazione la possano fare solo gli admin
+    public static UserModel getUser(){
+        Connection connection = JDBC.getInstance().getConnection();
+        UserModel User = new UserModel();
+
+        String sql = "SELECT * FROM users";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                User.setUsername(resultSet.getString("username"));
+                User.setName(resultSet.getString("name"));
+                User.setSurname(resultSet.getString("surname"));
+                User.setEmail(resultSet.getString("email"));
+                User.setPhone(resultSet.getString("phone"));
+                User.setAddress(resultSet.getString("address"));
+                User.setPassword(resultSet.getString("password"));
+                User.setRole(resultSet.getString("role"));
+
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        JDBC.closeConnection(connection);
+        return User;
+    }
+
+    //Delete user
+    public static int deleteUser(String username) {
+        Connection connection = JDBC.getConnection();
+        int result;
+
+        String sql = "DELETE FROM users WHERE username = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            result = preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+            JDBC.closeConnection(connection);
+        return result;
+    }
+
+    public static UserModel updateUser(UserModel user) {
+        Connection connection = JDBC.getConnection();
+        UserModel userResult = new UserModel();
+
+        String sql = "UPDATE users SET usernane = ?, name = ?, surname = ?, address = ?, password = ?, phone = ?, email = ? WHERE username = ?";
+
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, user.getUsername());
+            preparedStatement.setString(2, user.getName());
+            preparedStatement.setString(3, user.getSurname());
+            preparedStatement.setString(4, user.getAddress());
+            preparedStatement.setString(5, user.getPassword());
+            preparedStatement.setString(6, user.getPhone());
+            preparedStatement.setString(7, user.getRole());
+            preparedStatement.setString(8, user.getEmail());
+            preparedStatement.executeUpdate();
+
+            userResult.setUsername(user.getUsername());
+            userResult.setName(user.getName());
+            userResult.setSurname(user.getSurname());
+            userResult.setAddress(user.getAddress());
+            userResult.setPassword(user.getPassword());
+            userResult.setPhone(user.getPhone());
+            userResult.setEmail(user.getEmail());
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        JDBC.closeConnection(connection);
+        return userResult;
+    }
 }

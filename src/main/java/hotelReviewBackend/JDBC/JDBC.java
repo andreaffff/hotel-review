@@ -27,7 +27,7 @@ public class JDBC {
         return instance;
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         Connection connection;
         System.out.println("URL:"+URL);
         try {

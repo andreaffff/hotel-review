@@ -30,4 +30,23 @@ public class UserRoutes {
         return UserController.getUserByUsername(username);
     }
 
+    @Path("/Users")
+    @GET
+    @Produces("application/json")
+    public UserModel user(UserModel user) {
+        return UserController.getUser();
+    }
+
+    @DELETE
+    @Path("{username}")
+    @Produces("text/plain")
+    public int deleteUser(@PathParam("username") String username) {
+        return UserController.deleteUser(username);
+    }
+
+    @PUT
+    @Produces("application/json")
+    public UserModel updateUser(UserModel user) {
+        return UserController.updateUser(user);
+    }
 }
