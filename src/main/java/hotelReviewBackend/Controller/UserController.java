@@ -14,6 +14,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserController {
+    static Response response = null;
+    static JSONObject object;
+    static ResultSet result = null;
     public static Response addUser(UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
         JSONObject object ;
@@ -153,55 +156,64 @@ public class UserController {
     }
 
     //Delete user
-    public static int deleteUser(String username) {
-        Connection connection = JDBC.getConnection();
-        int result;
+    public static Response deleteUser(String username) {
+        Connection connection = JDBC.getInstance().getConnection();
 
-        String sql = "DELETE FROM users WHERE username = ?";
+        String sql = "DELETE  FROM users WHERE username = ? ";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
-            result = preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            preparedStatement.executeUpdate();
+            object = new JSONObject();
+            object.put("Avviso", "Utente eliminato correttamente"); // admin only
+            response = Response.status(Response.Status.OK).entity(object.toString()).build();
+
+        } catch (Exception e) {
+           // throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
             JDBC.closeConnection(connection);
-        return result;
+        return response ;
     }
 
-    public static UserModel updateUser(UserModel user) {
-        Connection connection = JDBC.getConnection();
-        UserModel userResult = new UserModel();
-
-        String sql = "UPDATE users SET usernane = ?, name = ?, surname = ?, address = ?, password = ?, phone = ?, email = ? WHERE username = ?";
+    public static Response updateUser(UserModel user, String username) {
+        Connection connection = JDBC.getInstance().getConnection();
+        String updateUserSql = "UPDATE users SET username = ?, name = ?, surname = ?, address = ?, password = ?, phone = ?, email = ? WHERE username = ?";
 
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, user.getUsername());
+
+            PreparedStatement preparedStatement = connection.prepareStatement(updateUserSql);
+            preparedStatement.setString(1, username);
+            System.out.println(username);
             preparedStatement.setString(2, user.getName());
+            System.out.println(user.getName());
             preparedStatement.setString(3, user.getSurname());
+            System.out.println(user.getSurname());
             preparedStatement.setString(4, user.getAddress());
+            System.out.println(username);user.getAddress();
             preparedStatement.setString(5, user.getPassword());
+            System.out.println(user.getPassword());
             preparedStatement.setString(6, user.getPhone());
+            System.out.println(user.getPhone());
             preparedStatement.setString(7, user.getRole());
+            System.out.println(user.getRole());
             preparedStatement.setString(8, user.getEmail());
+            System.out.println(user.getEmail());
             preparedStatement.executeUpdate();
 
-            userResult.setUsername(user.getUsername());
-            userResult.setName(user.getName());
-            userResult.setSurname(user.getSurname());
-            userResult.setAddress(user.getAddress());
-            userResult.setPassword(user.getPassword());
-            userResult.setPhone(user.getPhone());
-            userResult.setEmail(user.getEmail());
+            object = new JSONObject();
+            object.put("Avviso", "Utente modificato correttamente"); // admin only
+            response = Response.status(Response.Status.OK).entity(object.toString()).build();
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+
+        } catch (Exception e) {
+            //throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         JDBC.closeConnection(connection);
-        return userResult;
+        return response;
     }
 }

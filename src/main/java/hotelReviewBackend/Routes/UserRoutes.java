@@ -38,15 +38,15 @@ public class UserRoutes {
     }
 
     @DELETE
-    @Path("{username}")
-    @Produces("text/plain")
-    public int deleteUser(@PathParam("username") String username) {
+    @Produces("application/json")
+    public Response deleteUser(@QueryParam("username") String username) {
         return UserController.deleteUser(username);
     }
 
+    @Path("/updateUser")
     @PUT
     @Produces("application/json")
-    public UserModel updateUser(UserModel user) {
-        return UserController.updateUser(user);
+    public Response updateUser(@QueryParam("username") String username, UserModel user) {
+        return UserController.updateUser(user, username);
     }
 }
