@@ -4,6 +4,7 @@ import hotelReviewBackend.JDBC.JDBC;
 import hotelReviewBackend.Model.UserModel;
 import hotelReviewBackend.Model.LoginModel;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -181,35 +182,45 @@ public class UserController {
     public static Response updateUser(UserModel user, String username) {
         Connection connection = JDBC.getInstance().getConnection();
         String updateUserSql = "UPDATE users SET username = ?, name = ?, surname = ?, address = ?, password = ?, phone = ?, email = ? WHERE username = ?";
+        String getOneSql = "SELECT username FROM users WHERE username = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+            preparedStatement.setString(1, username);
+            result = preparedStatement.executeQuery();
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
 
         try {
+            if(result.next()) {
+                PreparedStatement preparedStatement = connection.prepareStatement(updateUserSql);
+                preparedStatement.setString(1, user.getUsername());
+                System.out.println(user.getUsername());
+                preparedStatement.setString(2, user.getName());
+                preparedStatement.setString(3, user.getSurname());
+                preparedStatement.setString(4, user.getAddress());
+                preparedStatement.setString(5, user.getPassword());
+                preparedStatement.setString(6, user.getPhone());
+                preparedStatement.setString(7, user.getEmail());
+                preparedStatement.setString(8, username);
+                System.out.println(username);
+                preparedStatement.executeUpdate();
 
-            PreparedStatement preparedStatement = connection.prepareStatement(updateUserSql);
-            preparedStatement.setString(1, username);
-            System.out.println(username);
-            preparedStatement.setString(2, user.getName());
-            System.out.println(user.getName());
-            preparedStatement.setString(3, user.getSurname());
-            System.out.println(user.getSurname());
-            preparedStatement.setString(4, user.getAddress());
-            System.out.println(username);user.getAddress();
-            preparedStatement.setString(5, user.getPassword());
-            System.out.println(user.getPassword());
-            preparedStatement.setString(6, user.getPhone());
-            System.out.println(user.getPhone());
-            preparedStatement.setString(7, user.getRole());
-            System.out.println(user.getRole());
-            preparedStatement.setString(8, user.getEmail());
-            System.out.println(user.getEmail());
-            preparedStatement.executeUpdate();
-
-            object = new JSONObject();
-            object.put("Avviso", "Utente modificato correttamente"); // admin only
-            response = Response.status(Response.Status.OK).entity(object.toString()).build();
-
+                object = new JSONObject();
+                object.put("Avviso", "Utente modificato correttamente"); // admin only
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            }else{
+                object = new JSONObject();
+                try {
+                    object.put("Avviso", "Errore durante l'aggiornamento, utente non riconosciuto");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
+            }
 
         } catch (Exception e) {
-            //throw new RuntimeException(e);
             e.printStackTrace();
         }
 
