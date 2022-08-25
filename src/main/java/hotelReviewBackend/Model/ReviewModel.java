@@ -8,6 +8,7 @@ public class ReviewModel {
     int upvote;
     int downvote;
     String username;
+    String cap;
 
     public String getCap() {
         return cap;
@@ -16,8 +17,6 @@ public class ReviewModel {
     public void setCap(String cap) {
         this.cap = cap;
     }
-
-    String cap;
 
   /*  public int getId() {
         return id;
