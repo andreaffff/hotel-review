@@ -38,12 +38,6 @@ public class UserRoutes {
         return UserController.getAllUsers();
     }
 
-    @Path("/Users")
-    @GET
-    @Produces("application/json")
-    public UserModel user(UserModel user) {
-        return UserController.getUser();
-    }
 
     @DELETE
     @Produces("application/json")

@@ -13,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserController {
     static Response response = null;
@@ -128,9 +130,9 @@ public class UserController {
         return user;
     }
     //Credo che questa operazione la possano fare solo gli admin
-    public static UserModel getUser(){
+    public static List<UserModel> getAllUsers(){
         Connection connection = JDBC.getInstance().getConnection();
-        UserModel User = new UserModel();
+       List<UserModel> Users =  new ArrayList<>();
 
         String sql = "SELECT * FROM users";
         try {
@@ -138,6 +140,7 @@ public class UserController {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
+                UserModel User = new UserModel();
                 User.setUsername(resultSet.getString("username"));
                 User.setName(resultSet.getString("name"));
                 User.setSurname(resultSet.getString("surname"));
@@ -146,6 +149,7 @@ public class UserController {
                 User.setAddress(resultSet.getString("address"));
                 User.setPassword(resultSet.getString("password"));
                 User.setRole(resultSet.getString("role"));
+                Users.add(User);
 
             }
         } catch (SQLException e) {
@@ -153,7 +157,7 @@ public class UserController {
         }
 
         JDBC.closeConnection(connection);
-        return User;
+        return Users;
     }
 
     //Delete user
@@ -196,7 +200,6 @@ public class UserController {
             if(result.next()) {
                 PreparedStatement preparedStatement = connection.prepareStatement(updateUserSql);
                 preparedStatement.setString(1, user.getUsername());
-                System.out.println(user.getUsername());
                 preparedStatement.setString(2, user.getName());
                 preparedStatement.setString(3, user.getSurname());
                 preparedStatement.setString(4, user.getAddress());
@@ -204,7 +207,6 @@ public class UserController {
                 preparedStatement.setString(6, user.getPhone());
                 preparedStatement.setString(7, user.getEmail());
                 preparedStatement.setString(8, username);
-                System.out.println(username);
                 preparedStatement.executeUpdate();
 
                 object = new JSONObject();
