@@ -45,7 +45,6 @@ public class UserController {
                 preparedStatement.setString(6, user.getPhone());
                 preparedStatement.setString(7, user.getRole());
                 preparedStatement.setString(8, user.getEmail());
-                System.out.println("CIAOaaaa");
                 preparedStatement.executeUpdate(); //aggiungi il nuovo utente nel DB
                 object = new JSONObject();
                 object.put("Avviso", "Utente registrato correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
@@ -165,14 +164,33 @@ public class UserController {
         Connection connection = JDBC.getInstance().getConnection();
 
         String sql = "DELETE  FROM users WHERE username = ? ";
+        String getOneSql = "SELECT username FROM users WHERE username = ?";
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+            preparedStatement.setString(1, username);
+            result = preparedStatement.executeQuery();
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
 
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, username);
-            preparedStatement.executeUpdate();
-            object = new JSONObject();
-            object.put("Avviso", "Utente eliminato correttamente"); // admin only
-            response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            if(result.next()) {
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1, username);
+                preparedStatement.executeUpdate();
+                object = new JSONObject();
+                object.put("Avviso", "Utente eliminato correttamente"); // admin only
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            }else{
+                object = new JSONObject();
+                try {
+                    object.put("Avviso", "Errore durante l'eliminazione, utente non riconosciuto");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
+            }
 
         } catch (Exception e) {
            // throw new RuntimeException(e);
@@ -197,13 +215,14 @@ public class UserController {
         }
 
         try {
+            String hash = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt(10));
             if(result.next()) {
                 PreparedStatement preparedStatement = connection.prepareStatement(updateUserSql);
                 preparedStatement.setString(1, user.getUsername());
                 preparedStatement.setString(2, user.getName());
                 preparedStatement.setString(3, user.getSurname());
                 preparedStatement.setString(4, user.getAddress());
-                preparedStatement.setString(5, user.getPassword());
+                preparedStatement.setString(5, hash);
                 preparedStatement.setString(6, user.getPhone());
                 preparedStatement.setString(7, user.getEmail());
                 preparedStatement.setString(8, username);
