@@ -63,8 +63,6 @@ public class UserModel {
     }
 
     public void setPassword(String password) {
-        System.out.println(this.password);
-        System.out.println(password);
         this.password = password;
     }
 

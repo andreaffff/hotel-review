@@ -50,7 +50,7 @@ public class ReviewRoutes {
 
     @DELETE
     @Produces("application/json")
-    public Response deleteReviewById(@QueryParam("id")String id){
+    public Response deleteReviewById(@QueryParam("id") String id) {
         return ReviewController.deleteReviewById(id);
     }
 

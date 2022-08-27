@@ -3,11 +3,12 @@ package hotelReviewBackend.Routes;
 import hotelReviewBackend.Controller.UserController;
 import hotelReviewBackend.Model.LoginModel;
 import hotelReviewBackend.Model.UserModel;
-import org.apache.camel.Body;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.util.List;
+
+//TODO aggiungere update role (admin only)
 
 @Path("/user")
 public class UserRoutes {
@@ -35,10 +36,9 @@ public class UserRoutes {
     @GET
     @Path("/all")
     @Produces("application/json")
-    public List<UserModel> getAllUsers() {
-        return UserController.getAllUsers();
+    public List<UserModel> getAllUsers(@QueryParam("username") String username) {
+        return UserController.getAllUsers(username);
     }
-
 
     @DELETE
     @Produces("application/json")
@@ -49,7 +49,7 @@ public class UserRoutes {
     @Path("/updateUser")
     @PUT
     @Produces("application/json")
-    public Response updateUser(@QueryParam("username") String username, UserModel user) {
-        return UserController.updateUser(user, username);
+    public Response updateUser(@QueryParam("username") String username, UserModel userToUpdate) {
+        return UserController.updateUser(username, userToUpdate);
     }
 }

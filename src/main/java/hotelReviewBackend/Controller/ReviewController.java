@@ -239,25 +239,25 @@ public class ReviewController {
         return response;
     }
 
-    public static Response deleteReviewById(String id){
+    public static Response deleteReviewById(String id) {
         Connection connection = JDBC.getInstance().getConnection();
 
-        String deleteOneSql =  "DELETE FROM reviews WHERE id = ?";
+        String deleteOneSql = "DELETE FROM reviews WHERE id = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(deleteOneSql);
             preparedStatement.setString(1, id);
             int rowsAffected = preparedStatement.executeUpdate();
             object = new JSONObject();
 
-            if(rowsAffected>0) {
+            if (rowsAffected > 0) {
                 object.put("Avviso", "Recensione rimossa correttamente");
                 response = Response.status(Response.Status.OK).entity(object.toString()).build();
-            }else{
+            } else {
                 object.put("Avviso", "Non è stata trovata nessuna recensione con questo id");
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return response;
