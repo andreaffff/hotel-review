@@ -107,22 +107,20 @@ public class UserController {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            System.out.println(username);
-
-            while (resultSet.next()) {
-                user.setUsername(resultSet.getString("username"));
-                user.setName(resultSet.getString("name"));
-                user.setSurname(resultSet.getString("surname"));
-                user.setEmail(resultSet.getString("email"));
-                user.setPhone(resultSet.getString("phone"));
-                user.setAddress(resultSet.getString("address"));
-                user.setPassword(resultSet.getString("password"));
-                user.setRole(resultSet.getString("role"));
+            result = preparedStatement.executeQuery();
+            if(result.next()) {
+                user.setUsername(result.getString("username"));
+                user.setName(result.getString("name"));
+                user.setSurname(result.getString("surname"));
+                user.setEmail(result.getString("email"));
+                user.setPhone(result.getString("phone"));
+                user.setAddress(result.getString("address"));
+                user.setPassword(result.getString("password"));
+                user.setRole(result.getString("role"));
                 System.out.println(user.getPassword());
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            e.printStackTrace();;
         }
 
         JDBC.closeConnection(connection);
@@ -160,24 +158,32 @@ public class UserController {
     }
 
     //Delete user
-    public static Response deleteUser(String username) {
+    public static Response deleteUser(String username, UserModel userToDelete) {
         Connection connection = JDBC.getInstance().getConnection();
+        UserModel user = new UserModel();
 
-        String sql = "DELETE  FROM users WHERE username = ? ";
-        String getOneSql = "SELECT username FROM users WHERE username = ?";
+
+        String getOneSql = "SELECT * FROM users WHERE username = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
             preparedStatement.setString(1, username);
+            System.out.println(username);
             result = preparedStatement.executeQuery();
-
-        }catch(SQLException e){
+        }catch(Exception e){
             e.printStackTrace();
         }
 
+
+
         try {
             if(result.next()) {
+               System.out.println(result.getString("role"));
+            if(result.getString("username").equals(userToDelete) || result.getString("role").equals("admin")){
+                System.out.println(result.getString("username"));
+                System.out.println(result.getString("role"));
+                String sql = "DELETE  FROM users WHERE username = ? ";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1, username);
+                preparedStatement.setString(1, userToDelete.getUsername());
                 preparedStatement.executeUpdate();
                 object = new JSONObject();
                 object.put("Avviso", "Utente eliminato correttamente"); // admin only
@@ -185,12 +191,23 @@ public class UserController {
             }else{
                 object = new JSONObject();
                 try {
-                    object.put("Avviso", "Errore durante l'eliminazione, utente non riconosciuto");
+                    object.put("Avviso", "accesso negato");
                 }catch(JSONException e){
                     e.printStackTrace();
                 }
                 response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
             }
+            }else{
+                object = new JSONObject();
+                try {
+                    object.put("Avviso", "Utente non riconosciuto");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
+            }
+
+
 
         } catch (Exception e) {
            // throw new RuntimeException(e);
@@ -207,7 +224,7 @@ public class UserController {
         String getOneSql = "SELECT username FROM users WHERE username = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
-            preparedStatement.setString(1, username);
+            preparedStatement.setString(1, user.getUsername());
             result = preparedStatement.executeQuery();
 
         }catch(SQLException e){

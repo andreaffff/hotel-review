@@ -3,6 +3,7 @@ package hotelReviewBackend.Routes;
 import hotelReviewBackend.Controller.UserController;
 import hotelReviewBackend.Model.LoginModel;
 import hotelReviewBackend.Model.UserModel;
+import org.apache.camel.Body;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -41,8 +42,8 @@ public class UserRoutes {
 
     @DELETE
     @Produces("application/json")
-    public Response deleteUser(@QueryParam("username") String username) {
-        return UserController.deleteUser(username);
+    public Response deleteUser(@QueryParam("username") String username, UserModel userToDelete) {
+        return UserController.deleteUser(username, userToDelete);
     }
 
     @Path("/updateUser")
