@@ -6,7 +6,7 @@ import hotelReviewBackend.Model.UserModel;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
-import java.util.List;
+
 
 //TODO aggiungere update role (admin only)
 
@@ -36,7 +36,7 @@ public class UserRoutes {
     @GET
     @Path("/all")
     @Produces("application/json")
-    public List<UserModel> getAllUsers(@QueryParam("username") String username) {
+    public Response getAllUsers(@QueryParam("username") String username) {
         return UserController.getAllUsers(username);
     }
 

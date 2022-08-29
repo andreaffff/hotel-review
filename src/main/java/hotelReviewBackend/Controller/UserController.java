@@ -19,6 +19,7 @@ public class UserController {
     static Response response = null;
     static JSONObject object;
     static ResultSet result = null;
+//TODO update role
 
     public static Response addUser(UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
@@ -118,7 +119,6 @@ public class UserController {
                 user.setAddress(result.getString("address"));
                 user.setPassword(result.getString("password"));
                 user.setRole(result.getString("role"));
-                System.out.println(user.getPassword());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,26 +130,27 @@ public class UserController {
     }
 
     //Credo che questa operazione la possano fare solo gli admin
-    public static List<UserModel> getAllUsers(String username) {
+    public static Response getAllUsers(String username) {
         Connection connection = JDBC.getInstance().getConnection();
-        List<UserModel> Users = new ArrayList<>();
+        int condition = 0;
+        condition = checkAdmin(username,connection);
         try {
-            if (checkAdmin(username, connection) == 0) {
+            if (condition == 0) {
                 object = new JSONObject();
                 object.put("Avviso", "Si è verificato un errore con il tuo account");
                 response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
 
-            } else if (checkAdmin(username, connection) == 1) {
+            } else if (condition == 1) {
                 object = new JSONObject();
                 object.put("Avviso", "Non hai il permesso per questa operazione");
                 //TODO riportare alla pagina di login
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
                 //TODO TODO TODO non si possono vedere i messaggi di errore perchè il return è l'array
-            } else if (checkAdmin(username, connection) == 2) {
-
+            } else if (condition == 2) {
                 String sql = "SELECT * FROM users";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 ResultSet resultSet = preparedStatement.executeQuery();
+                object = new JSONObject();
 
                 while (resultSet.next()) {
                     UserModel User = new UserModel();
@@ -161,37 +162,43 @@ public class UserController {
                     User.setAddress(resultSet.getString("address"));
                     User.setPassword(resultSet.getString("password"));
                     User.setRole(resultSet.getString("role"));
-                    Users.add(User);
+
+                    object.accumulate("All users",User.toJson());
+                    response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
                 }
+
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         JDBC.closeConnection(connection);
-        return Users;
-    }
+
+
+        return response;
+    } //FATTO
 
     //Delete user
     public static Response deleteUser(String username, UserModel userToDelete) {
         Connection connection = JDBC.getInstance().getConnection();
+        int condition = checkUsernameMatchAndIsAdmin(userToDelete,username,connection);
 
         try {
             // Se l'utente che vuole fare l'eliminazione non è admin o non sta eliminando il proprio account
-            if (checkUsernameMatchAndIsAdmin(userToDelete, username, connection) == 0) {
+            if (condition == 0) {
                 //TODO in caso l'utente elimina se stesso fare logout
                 object = new JSONObject();
                 object.put("Avviso", "Si è verificato un errore con il tuo account");
-                response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
+                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
 
                 //Se l'utente che vuole fare l'eliminazione non è nel DB
-            } else if (checkUsernameMatchAndIsAdmin(userToDelete, username, connection) == 1) {
+            } else if (condition == 1) {
                 object = new JSONObject();
                 object.put("Avviso", "Non hai il permesso per questa operazione");
                 //TODO riportare alla pagina di login
-                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
+                response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
 
-            } else if (checkUsernameMatchAndIsAdmin(userToDelete, username, connection) == 2) {
+            } else if (condition == 2) {
                 String sql = "DELETE  FROM users WHERE username = ? ";
                 PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, userToDelete.getUsername());
@@ -256,10 +263,11 @@ public class UserController {
 
         JDBC.closeConnection(connection);
         return response;
-    }
+    } //FATTO
 
 
     public static int checkAdmin(String username, Connection connection) {
+        System.out.println("Entra qui");
         String getOneSql = "SELECT * FROM users WHERE username = ?";
         int condition = 0; //0 se non c'è l'utente che esegue l'eliminazione nel DB
         try {
@@ -268,8 +276,6 @@ public class UserController {
             result = preparedStatement.executeQuery();
             if (result.next()) {
                 condition = 1; //1 se c'è l'utente che esegue l'eliminazione ma non si hanno i permessi
-                System.out.println(result.getString("role"));
-                System.out.println(result.getString("username"));
                 if (result.getString("role").equals("admin"))
                     condition = 2; // se l'utente che vuole fare l'eliminazione è presente e ha i permessi
             }

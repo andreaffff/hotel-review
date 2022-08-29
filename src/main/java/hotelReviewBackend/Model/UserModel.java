@@ -1,5 +1,8 @@
 package hotelReviewBackend.Model;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class UserModel {
     private String username;
     private String name;
@@ -77,4 +80,24 @@ public class UserModel {
         this.role = role;
     }
 
+    public JSONObject toJson(){
+
+        JSONObject jsonObject = new JSONObject();
+        try{
+            jsonObject.put("username",username);
+            jsonObject.put("password",password);
+            jsonObject.put("nome",name);
+            jsonObject.put("surname",surname);
+            jsonObject.put("address",address);
+            jsonObject.put("email",email);
+            jsonObject.put("phone",phone);
+            jsonObject.put("role",role);
+
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+        return jsonObject;
+
+
+    }
 }
