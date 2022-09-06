@@ -70,8 +70,9 @@ public class UserModel {
     }
 
     public String getRole() {
-        if (role != "worker" && role != "admin")
+        if (!role.equals("worker") && !role.equals("admin"))
             role = "worker";
+        System.out.println("role2="+role);
 
         return role;
     }

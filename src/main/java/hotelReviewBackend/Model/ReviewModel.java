@@ -1,6 +1,8 @@
 package hotelReviewBackend.Model;
 
 public class ReviewModel {
+
+    int id;
     String title;
     String text;
     String hotel;
@@ -18,13 +20,13 @@ public class ReviewModel {
         this.cap = cap;
     }
 
-  /*  public int getId() {
+    public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }*/
+    }
 
     public String getTitle() {
         return title;
