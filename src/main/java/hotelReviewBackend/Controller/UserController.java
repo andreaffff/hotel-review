@@ -52,9 +52,6 @@ public class UserController {
                 object = new JSONObject();
                 object.put("Avviso", "Utente già registrato"); //verificare se è meglio try/catch o aggiungere il metodo in signature e creare una classe che gestisce le eccezioni
                 response = Response.status(Response.Status.CONFLICT).entity(object.toString()).build();
-                Response.status(400).
-                        entity(object).
-                        build();
             }
 
         } catch (Exception e) { //Dovrebbe prendere tutte le eccezioni
@@ -192,13 +189,27 @@ public class UserController {
                 response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
 
             } else if (condition == 2) {
-                String sql = "DELETE  FROM users WHERE username = ? ";
-                PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1, userToDelete.getUsername());
-                preparedStatement.executeUpdate();
-                object = new JSONObject();
-                object.put("Avviso", "Utente eliminato correttamente"); // admin only
-                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+                String getOneSql = "SELECT * FROM users WHERE username = ?";
+                try {
+                    PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+                    preparedStatement.setString(1, userToDelete.getUsername());
+                    result = preparedStatement.executeQuery();
+                }catch(SQLException e){
+                    e.printStackTrace();
+                }
+                if(result.next()) {
+                    String sql = "DELETE  FROM users WHERE username = ? ";
+                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                    preparedStatement.setString(1, userToDelete.getUsername());
+                    preparedStatement.executeUpdate();
+                    object = new JSONObject();
+                    object.put("Avviso", "Utente eliminato correttamente"); // admin only
+                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
+                } else {
+                    object = new JSONObject();
+                    object.put("Avviso", "Utente da eliminare non trovato"); // admin only
+                    response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
+                }
             }
 
         } catch (Exception e) {
