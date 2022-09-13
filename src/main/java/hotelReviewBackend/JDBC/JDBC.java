@@ -8,10 +8,10 @@ import java.sql.SQLException;
 
 public class JDBC {
     static Dotenv dotenv = Dotenv.configure().load();
-    private static final String URL = dotenv.get("URL");//"jdbc:mysql://localhost/hoteladvisor";;
-    private static final String USER = dotenv.get("USER");//"root";
-    private static final String PASSWORD = dotenv.get("PASSWORD");//"wPa06@3oeCq3" ;
-    private static final String DRIVER = dotenv.get("DRIVER");//"com.mysql.cj.jdbc.Driver";
+    private static final String URL = dotenv.get("URL");
+    private static final String USER = dotenv.get("USER");
+    private static final String PASSWORD = dotenv.get("PASSWORD");
+    private static final String DRIVER = dotenv.get("DRIVER");
     private static JDBC instance = null;
 
     private JDBC() {
@@ -31,9 +31,9 @@ public class JDBC {
 
     public static Connection getConnection() {
         Connection connection;
-        System.out.println("URL:" + URL);
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

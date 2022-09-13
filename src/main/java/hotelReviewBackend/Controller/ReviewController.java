@@ -2,6 +2,7 @@ package hotelReviewBackend.Controller;
 
 import hotelReviewBackend.JDBC.JDBC;
 import hotelReviewBackend.Model.ReviewModel;
+import hotelReviewBackend.Model.UserModel;
 import org.json.JSONObject;
 
 import javax.ws.rs.core.Response;
@@ -108,6 +109,7 @@ public class ReviewController {
 
             while (resultSet.next()) {
                 ReviewModel review = new ReviewModel();
+                review.setTitle(resultSet.getString("id"));
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
@@ -139,6 +141,7 @@ public class ReviewController {
 
             while (resultSet.next()) {
                 ReviewModel review = new ReviewModel();
+                review.setId(resultSet.getInt("id"));
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
@@ -158,27 +161,39 @@ public class ReviewController {
         return reviews;
     }
 
-    public static Response updateReviewById(String id, ReviewModel review) {
+    public static Response updateReviewById(String id, ReviewModel review, String username) {
+
         Response response = null;
         Connection connection = JDBC.getInstance().getConnection();
         JSONObject object;
-        String updateReviewSql = "UPDATE reviews SET title = ?, text = ?," +
-                " hotel = ?, valuation = ?,cap = ? WHERE id = ?";
-        //TODO Da vedere se hotel si deve modificare o no (si potrebbe usare api maps per trovare albergo)
-//Nella richiesta bisogna includere tutti i campi anche quelli che non cambiano
+        String getUserFromReviewsSQL = "SELECT * from reviews WHERE users_username = ? AND id = ?";
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(updateReviewSql);
-            preparedStatement.setString(1, review.getTitle());
-            preparedStatement.setString(2, review.getText());
-            preparedStatement.setString(3, review.getHotel());
-            preparedStatement.setString(4, review.getValuation());
-            preparedStatement.setString(5, review.getCap());
-            preparedStatement.setString(6, id);
-            preparedStatement.executeUpdate();
-            object = new JSONObject();
-            object.put("Avviso", "Recensione modificata correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
-            response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            PreparedStatement preparedStatement = connection.prepareStatement(getUserFromReviewsSQL);
+            preparedStatement.setString(1,username);
+            preparedStatement.setString(2,id);
+            result = preparedStatement.executeQuery();
+            if(result.next()) {
+                String updateReviewSql = "UPDATE reviews SET title = ?, text = ?," +
+                        " hotel = ?, valuation = ?,cap = ? WHERE id = ?";
 
+//Nella richiesta bisogna includere tutti i campi anche quelli che non cambiano
+
+                preparedStatement = connection.prepareStatement(updateReviewSql);
+                preparedStatement.setString(1, review.getTitle());
+                preparedStatement.setString(2, review.getText());
+                preparedStatement.setString(3, review.getHotel());
+                preparedStatement.setString(4, review.getValuation());
+                preparedStatement.setString(5, review.getCap());
+                preparedStatement.setString(6, id);
+                preparedStatement.executeUpdate();
+                object = new JSONObject();
+                object.put("Avviso", "Recensione modificata correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            }else{
+                object = new JSONObject();
+                object.put("Avviso", "Impossibile modificare la recensione"); //verificare se è meglio try/catch o aggiungere il metode in signature
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -262,5 +277,6 @@ public class ReviewController {
         }
         return response;
 
-    }
+    } //Admin only or the username
+
 }

@@ -37,8 +37,8 @@ public class ReviewRoutes {
 
     @PUT
     @Produces("application/json")
-    public Response updateReviewById(@QueryParam("id") String id, ReviewModel review) {
-        return ReviewController.updateReviewById(id, review);
+    public Response updateReviewById(@QueryParam("id") String id,@QueryParam("username")String username, ReviewModel review) {
+        return ReviewController.updateReviewById(id, review,username);
     }
 
     @PUT
