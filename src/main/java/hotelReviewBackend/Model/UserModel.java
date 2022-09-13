@@ -70,13 +70,15 @@ public class UserModel {
     }
 
     public String getRole() {
-        if (!role.equals("worker") && !role.equals("admin"))
-            role = "worker";
+        if (!role.equals("basic") && !role.equals("admin"))
+            role = "basic";
 
         return role;
     }
 
     public void setRole(String role) {
+        if (!role.equals("basic") && !role.equals("admin"))
+            role = "basic";
         this.role = role;
     }
 

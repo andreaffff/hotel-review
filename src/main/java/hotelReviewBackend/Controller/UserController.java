@@ -66,7 +66,7 @@ public class UserController {
         Response response = null;
         ResultSet result;
         //Cerco la password tramite lo username
-        String checkUser = "SELECT password from users WHERE username= ?";
+        String checkUser = "SELECT * from users WHERE username= ?";
         try {
             Connection connection = JDBC.getInstance().getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(checkUser);
@@ -76,7 +76,7 @@ public class UserController {
             if (result.next()) { //Se lo username è nel DB
                 if (BCrypt.checkpw(user.getPassword(), result.getString("password"))) {
                     object = new JSONObject();
-                    object.put("Avviso", "Login riuscito");
+                    object.put("role", result.getString("role"));
                     response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 } else {
                     object = new JSONObject();

@@ -6,18 +6,18 @@ public class ReviewModel {
     String title;
     String text;
     String hotel;
-    String valuation;
+    float rating;
     int upvote;
     int downvote;
     String username;
-    String cap;
+    String zipCode;
 
-    public String getCap() {
-        return cap;
+    public String getZipCode() {
+        return zipCode;
     }
 
-    public void setCap(String cap) {
-        this.cap = cap;
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
     }
 
     public int getId() {
@@ -52,12 +52,12 @@ public class ReviewModel {
         this.hotel = hotel;
     }
 
-    public String getValuation() {
-        return valuation;
+    public float getRating() {
+        return rating;
     }
 
     public void setValuation(String valuation) {
-        this.valuation = valuation;
+        this.rating = rating;
     }
 
     public int getUpvote() {
