@@ -155,7 +155,7 @@ public class UserController {
                     user.setRole(resultSet.getString("role"));
 
                     object.accumulate("All users",user.toJson());
-                    response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
+                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 }
 
             }
@@ -171,46 +171,26 @@ public class UserController {
     //Delete user
     public static Response deleteUser(String username, UserModel userToDelete) {
         Connection connection = JDBC.getInstance().getConnection();
-        int condition = checkUsernameMatchAndIsAdmin(userToDelete,username,connection);
-
         try {
-            //Se l'utente che vuole fare l'eliminazione non è nel DB
-            if (condition == 0) {
-                //TODO in caso l'utente elimina se stesso fare logout
+            String getOneSql = "SELECT * FROM users WHERE username = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+            preparedStatement.setString(1, userToDelete.getUsername());
+            result = preparedStatement.executeQuery();
+
+            if (result.next()) {
+                String sql = "DELETE  FROM users WHERE username = ? ";
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1, userToDelete.getUsername());
+                preparedStatement.executeUpdate();
                 object = new JSONObject();
-                object.put("Avviso", "Si è verificato un errore con il tuo account");
+                object.put("Avviso", "Utente eliminato correttamente"); // admin only
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            } else {
+                object = new JSONObject();
+                object.put("Avviso", "Utente da eliminare non trovato"); // admin only
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
-
-                // Se l'utente che vuole fare l'eliminazione non è admin o non sta eliminando il proprio account
-            } else if (condition == 1) {
-                object = new JSONObject();
-                object.put("Avviso", "Non hai il permesso per questa operazione");
-                //TODO riportare alla pagina di login
-                response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
-
-            } else if (condition == 2) {
-                String getOneSql = "SELECT * FROM users WHERE username = ?";
-                try {
-                    PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
-                    preparedStatement.setString(1, userToDelete.getUsername());
-                    result = preparedStatement.executeQuery();
-                }catch(SQLException e){
-                    e.printStackTrace();
-                }
-                if(result.next()) {
-                    String sql = "DELETE  FROM users WHERE username = ? ";
-                    PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                    preparedStatement.setString(1, userToDelete.getUsername());
-                    preparedStatement.executeUpdate();
-                    object = new JSONObject();
-                    object.put("Avviso", "Utente eliminato correttamente"); // admin only
-                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                } else {
-                    object = new JSONObject();
-                    object.put("Avviso", "Utente da eliminare non trovato"); // admin only
-                    response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
-                }
             }
+
 
         } catch (Exception e) {
             // throw new RuntimeException(e);
