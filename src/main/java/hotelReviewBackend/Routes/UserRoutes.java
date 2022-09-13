@@ -40,8 +40,8 @@ public class UserRoutes {
 
     @DELETE
     @Produces("application/json")
-    public Response deleteUser(@QueryParam("username") String username, UserModel userToDelete) {
-        return UserController.deleteUser(username, userToDelete);
+    public Response deleteUser(@QueryParam("username") String username) {
+        return UserController.deleteUser(username);
     }
 
     @Path("/updateUser")

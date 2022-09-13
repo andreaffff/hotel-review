@@ -169,18 +169,18 @@ public class UserController {
         return response;
     } //admin only
     //Delete user
-    public static Response deleteUser(String username, UserModel userToDelete) {
+    public static Response deleteUser(String username) {
         Connection connection = JDBC.getInstance().getConnection();
         try {
             String getOneSql = "SELECT * FROM users WHERE username = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
-            preparedStatement.setString(1, userToDelete.getUsername());
+            preparedStatement.setString(1, username);
             result = preparedStatement.executeQuery();
 
             if (result.next()) {
                 String sql = "DELETE  FROM users WHERE username = ? ";
                 preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1, userToDelete.getUsername());
+                preparedStatement.setString(1, username);
                 preparedStatement.executeUpdate();
                 object = new JSONObject();
                 object.put("Avviso", "Utente eliminato correttamente"); // admin only
