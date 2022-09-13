@@ -401,24 +401,6 @@ public class UserController {
         return condition;
     }
 
-    public static int checkUsernameMatchAndIsAdmin(UserModel userToCheck, String username, Connection connection) {
-        String getOneSql = "SELECT * FROM users WHERE username = ?";
-        int condition = 0; //0 se non c'è l'utente che esegue l'eliminazione nel DB
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
-            preparedStatement.setString(1, username);
-            result = preparedStatement.executeQuery();
-            if (result.next()) {
-                condition = 1; //1 se c'è l'utente che esegue l'eliminazione ma non si hanno i permessi
-
-                if (result.getString("username").equals(userToCheck.getUsername()) || result.getString("role").equals("admin"))
-                    condition = 2; // se l'utente che vuole fare l'eliminazione è presente e ha i permessi
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return condition;
-    }
 
 
 }
