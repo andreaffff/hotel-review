@@ -244,22 +244,10 @@ public class UserController {
     public static Response updateRole(String username, UserModel user){
         Connection connection = JDBC.getInstance().getConnection();
         String updateRoleSql = "UPDATE users SET role = ? WHERE username = ?";
-        int condition = checkAdmin(username,connection);
         try{
-            if(condition == 0){ //Se l'utente che vuole fare l'aggiornamento non è nel DB
-                object = new JSONObject();
-                object.put("Avviso", "Si è verificato un errore con il tuo account");
-                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
-
-            }else if (condition == 1){ // Se l'utente che vuole fare l'aggiornamento non è admin o non sta eliminando il proprio account
-                object = new JSONObject();
-                object.put("Avviso", "Non hai il permesso per questa operazione");
-                response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
-
-            }else if (condition == 2) {
                 PreparedStatement preparedStatement = connection.prepareStatement(updateRoleSql);
                 preparedStatement.setString(1, user.getRole());
-                preparedStatement.setString(2, user.getUsername());
+                preparedStatement.setString(2, username);
 
                 int rowsAffected = preparedStatement.executeUpdate();
 
@@ -273,7 +261,6 @@ public class UserController {
                     object.put("Avviso", "Si è verificato un errore durante l'operazione");
                     response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
                 }
-            }
             } catch (Exception e) {
                 e.printStackTrace();
             }
