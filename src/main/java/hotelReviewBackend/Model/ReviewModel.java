@@ -56,7 +56,7 @@ public class ReviewModel {
         return rating;
     }
 
-    public void setValuation(String valuation) {
+    public void setRating(float rating) {
         this.rating = rating;
     }
 

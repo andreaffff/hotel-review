@@ -76,7 +76,7 @@ public class ReviewController {
                 review.setTitle(result.getString("title"));
                 review.setText(result.getString("text"));
                 review.setHotel(result.getString("hotel"));
-                review.setValuation(result.getString("rating"));
+                review.setRating(result.getFloat("rating"));
                 review.setUpvote(result.getInt("upvote"));
                 review.setDownvote(result.getInt("downvote"));
                 review.setUsername(result.getString("users_username"));
@@ -113,7 +113,7 @@ public class ReviewController {
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
-                review.setValuation(resultSet.getString("valuation"));
+                review.setRating(resultSet.getFloat("rating"));
                 review.setUpvote(resultSet.getInt("upvote"));
                 review.setDownvote(resultSet.getInt("downvote"));
                 review.setUsername(resultSet.getString("users_username"));
@@ -145,7 +145,7 @@ public class ReviewController {
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
-                review.setValuation(resultSet.getString("valuation"));
+                review.setRating(resultSet.getFloat("rating"));
                 review.setUpvote(resultSet.getInt("upvote"));
                 review.setDownvote(resultSet.getInt("downvote"));
                 review.setUsername(resultSet.getString("users_username"));

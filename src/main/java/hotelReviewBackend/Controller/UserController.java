@@ -65,7 +65,6 @@ public class UserController {
         JSONObject object;
         Response response = null;
         ResultSet result;
-        //Cerco la password tramite lo username
         String checkUser = "SELECT * from users WHERE username= ?";
         try {
             Connection connection = JDBC.getInstance().getConnection();
@@ -171,25 +170,26 @@ public class UserController {
     //Delete user
     public static Response deleteUser(String username) {
         Connection connection = JDBC.getInstance().getConnection();
-        try {
-            String getOneSql = "SELECT * FROM users WHERE username = ?";
+       try {
+      /*       String getOneSql = "SELECT * FROM users WHERE username = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
             preparedStatement.setString(1, username);
             result = preparedStatement.executeQuery();
 
-            if (result.next()) {
+            if (result.next()) {*/
                 String sql = "DELETE  FROM users WHERE username = ? ";
-                preparedStatement = connection.prepareStatement(sql);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
                 preparedStatement.setString(1, username);
+                System.out.println("username:"+ username);
                 preparedStatement.executeUpdate();
                 object = new JSONObject();
                 object.put("Avviso", "Utente eliminato correttamente"); // admin only
                 response = Response.status(Response.Status.OK).entity(object.toString()).build();
-            } else {
+         /*   } else {
                 object = new JSONObject();
                 object.put("Avviso", "Utente da eliminare non trovato"); // admin only
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
-            }
+            }*/
 
 
         } catch (Exception e) {
@@ -199,7 +199,7 @@ public class UserController {
 
         JDBC.closeConnection(connection);
         return response;
-    } //admin only or username
+    }
 
     public static Response updateUser(String username, UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
@@ -266,7 +266,7 @@ public class UserController {
             }
 
         return response;
-    } //admin only
+    }
 
     public static Response updatePassword(String username, UpdatePasswordOrUsernameModel password) {
 
@@ -311,7 +311,7 @@ public class UserController {
             e.printStackTrace();
         }
         return response;
-    } //username only
+    }
 
     public static Response updateUsername(String username, UpdatePasswordOrUsernameModel updateUsername ){
         Connection connection = JDBC.getInstance().getConnection();
