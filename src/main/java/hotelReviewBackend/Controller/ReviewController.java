@@ -21,29 +21,25 @@ public class ReviewController {
 
     public static Response addReview(String username, ReviewModel review) {
         Connection connection = JDBC.getInstance().getConnection();
-        //Verifica se l' utente ha già inserito una recensione per l'hotel
 
-        String checkReviewSql = "SELECT * from reviews WHERE users_username = ? AND hotel = ? AND zipCode = ?";
+        String checkReviewSql = "SELECT * from reviews WHERE users_username = ? AND hotel = ?";
 
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(checkReviewSql);
             preparedStatement.setString(1, username);
             preparedStatement.setString(2, review.getHotel());
-            preparedStatement.setString(3, review.getZipCode());
 
             result = preparedStatement.executeQuery();
 
             if (!result.next()) {
-                String insertReviewSql = "INSERT INTO reviews(title,text,hotel,rating,upvote,downvote,users_username,zipCode) VALUES (?,?,?,?,?,?,?,?)";
+                String insertReviewSql = "INSERT INTO reviews(title,text,hotel,rating,users_username,zipCode) VALUES (?,?,?,?,?,?)";
                 preparedStatement = connection.prepareStatement(insertReviewSql);
                 preparedStatement.setString(1, review.getTitle());
                 preparedStatement.setString(2, review.getText());
                 preparedStatement.setString(3, review.getHotel());
                 preparedStatement.setFloat(4, review.getRating());
-                preparedStatement.setInt(5, 0); //La recensione appena inserita non ha voti
-                preparedStatement.setInt(6, 0);
-                preparedStatement.setString(7, username);
-                preparedStatement.setString(8, review.getZipCode());
+                preparedStatement.setString(5, username);
+                preparedStatement.setString(6, review.getZipCode());
                 preparedStatement.executeUpdate();
                 object = new JSONObject();
                 object.put("Avviso", "Recensione inserita correttamente"); //verificare se è meglio try/catch o aggiungere il metode in signature
@@ -77,8 +73,6 @@ public class ReviewController {
                 review.setText(result.getString("text"));
                 review.setHotel(result.getString("hotel"));
                 review.setRating(result.getFloat("rating"));
-                review.setUpvote(result.getInt("upvote"));
-                review.setDownvote(result.getInt("downvote"));
                 review.setUsername(result.getString("users_username"));
                 review.setZipCode(result.getString("zipCode"));
             }
@@ -100,22 +94,19 @@ public class ReviewController {
         Connection connection = JDBC.getInstance().getConnection();
         List<ReviewModel> reviews = new ArrayList<>();
 
-        String getAllSql = "SELECT * FROM reviews WHERE (hotel=? AND zipCode = ?)";
+        String getAllSql = "SELECT * FROM reviews WHERE (hotel=?)";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(getAllSql);
             preparedStatement.setString(1, hotel);
-            preparedStatement.setString(2, zipCode);
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
                 ReviewModel review = new ReviewModel();
-                review.setTitle(resultSet.getString("id"));
+                review.setId(resultSet.getInt("id"));
                 review.setTitle(resultSet.getString("title"));
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
                 review.setRating(resultSet.getFloat("rating"));
-                review.setUpvote(resultSet.getInt("upvote"));
-                review.setDownvote(resultSet.getInt("downvote"));
                 review.setUsername(resultSet.getString("users_username"));
                 review.setZipCode(resultSet.getString("zipCode"));
                 reviews.add(review);
@@ -146,8 +137,6 @@ public class ReviewController {
                 review.setText(resultSet.getString("text"));
                 review.setHotel(resultSet.getString("hotel"));
                 review.setRating(resultSet.getFloat("rating"));
-                review.setUpvote(resultSet.getInt("upvote"));
-                review.setDownvote(resultSet.getInt("downvote"));
                 review.setUsername(resultSet.getString("users_username"));
                 review.setZipCode(resultSet.getString("zipCode"));
                 reviews.add(review);
@@ -161,16 +150,15 @@ public class ReviewController {
         return reviews;
     }
 
-    public static Response updateReviewById(String id, ReviewModel review, String username) {
+    public static Response updateReviewById(String id, ReviewModel review) {
 
         Response response = null;
         Connection connection = JDBC.getInstance().getConnection();
         JSONObject object;
-        String getUserFromReviewsSQL = "SELECT * from reviews WHERE users_username = ? AND id = ?";
+        String getUserFromReviewsSQL = "SELECT * from reviews WHERE id = ?";
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(getUserFromReviewsSQL);
-            preparedStatement.setString(1,username);
-            preparedStatement.setString(2,id);
+            preparedStatement.setString(1,id);
             result = preparedStatement.executeQuery();
             if(result.next()) {
                 String updateReviewSql = "UPDATE reviews SET title = ?, text = ?," +
@@ -202,57 +190,6 @@ public class ReviewController {
         return response;
     }
 
-    public static Response updateUpvoteOrDownvote(String id, String typevote, ReviewModel review) {
-        Connection connection = JDBC.getInstance().getConnection();
-        result = null;
-        String getOneSql = "SELECT * FROM reviews WHERE id = ?";
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
-            preparedStatement.setString(1, id);
-            result = preparedStatement.executeQuery();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        String updateUpVoteSql = "UPDATE reviews SET upvote= ? WHERE id = ?";
-        String updateDownVoteSql = "UPDATE reviews SET downvote= ? WHERE id = ?";
-        if (typevote.equals("upvote")) {
-            try {
-                if (result.next()) {
-                    PreparedStatement preparedStatement = connection.prepareStatement(updateUpVoteSql);
-                    preparedStatement.setInt(1, result.getInt("upvote") + 1);
-                    preparedStatement.setString(2, id);
-                    preparedStatement.executeUpdate();
-                    object = new JSONObject();
-                    object.put("Avviso", "Upvote aggiornato"); //verificare se è meglio try/catch o aggiungere il metode in signature
-                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else if (typevote.equals("downvote")) {
-            try {
-                if (result.next()) {
-                    PreparedStatement preparedStatement = connection.prepareStatement(updateDownVoteSql);
-                    preparedStatement.setInt(1, result.getInt("downvote") + 1);
-                    preparedStatement.setString(2, id);
-                    preparedStatement.executeUpdate();
-                    object = new JSONObject();
-                    object.put("Avviso", "Downvote aggiornato");
-                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                } else {
-                    object = new JSONObject();
-                    object.put("Avviso", "Errore durante l'aggiornamento");
-                    response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        JDBC.closeConnection(connection);
-        return response;
-    }
 
     public static Response deleteReviewById(String id) {
         Connection connection = JDBC.getInstance().getConnection();
@@ -277,6 +214,6 @@ public class ReviewController {
         }
         return response;
 
-    } //Admin only or the username
+    }
 
 }

@@ -7,8 +7,6 @@ public class ReviewModel {
     String text;
     String hotel;
     float rating;
-    int upvote;
-    int downvote;
     String username;
     String zipCode;
 
@@ -60,21 +58,7 @@ public class ReviewModel {
         this.rating = rating;
     }
 
-    public int getUpvote() {
-        return upvote;
-    }
 
-    public void setUpvote(int upvote) {
-        this.upvote = upvote;
-    }
-
-    public int getDownvote() {
-        return downvote;
-    }
-
-    public void setDownvote(int downvote) {
-        this.downvote = downvote;
-    }
 
     public String getUsername() {
         return username;

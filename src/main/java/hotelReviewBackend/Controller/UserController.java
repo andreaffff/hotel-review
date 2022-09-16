@@ -125,7 +125,7 @@ public class UserController {
     public static Response getAllUsers(String username) {
         Connection connection = JDBC.getInstance().getConnection();
         int condition = 0;
-        condition = checkAdmin(username,connection);
+        condition = checkAdmin(username, connection);
         try {
             if (condition == 0) {  //Se l'utente che vuole fare la get non è nel DB
                 object = new JSONObject();
@@ -153,7 +153,7 @@ public class UserController {
                     user.setPassword(resultSet.getString("password"));
                     user.setRole(resultSet.getString("role"));
 
-                    object.accumulate("All users",user.toJson());
+                    object.accumulate("All users", user.toJson());
                     response = Response.status(Response.Status.OK).entity(object.toString()).build();
                 }
 
@@ -167,29 +167,19 @@ public class UserController {
 
         return response;
     } //admin only
+
     //Delete user
     public static Response deleteUser(String username) {
         Connection connection = JDBC.getInstance().getConnection();
-       try {
-      /*       String getOneSql = "SELECT * FROM users WHERE username = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(getOneSql);
+        try {
+            String sql = "DELETE  FROM users WHERE username = ? ";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
-            result = preparedStatement.executeQuery();
-
-            if (result.next()) {*/
-                String sql = "DELETE  FROM users WHERE username = ? ";
-                PreparedStatement preparedStatement = connection.prepareStatement(sql);
-                preparedStatement.setString(1, username);
-                System.out.println("username:"+ username);
-                preparedStatement.executeUpdate();
-                object = new JSONObject();
-                object.put("Avviso", "Utente eliminato correttamente"); // admin only
-                response = Response.status(Response.Status.OK).entity(object.toString()).build();
-         /*   } else {
-                object = new JSONObject();
-                object.put("Avviso", "Utente da eliminare non trovato"); // admin only
-                response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
-            }*/
+            System.out.println("username:" + username);
+            preparedStatement.executeUpdate();
+            object = new JSONObject();
+            object.put("Avviso", "Utente eliminato correttamente"); // admin only
+            response = Response.status(Response.Status.OK).entity(object.toString()).build();
 
 
         } catch (Exception e) {
@@ -241,29 +231,28 @@ public class UserController {
         return response;
     } //Modificabile solo ne "il tuo profilo"
 
-    public static Response updateRole(String username, UserModel user){
+    public static Response updateRole(String username, UserModel user) {
         Connection connection = JDBC.getInstance().getConnection();
         String updateRoleSql = "UPDATE users SET role = ? WHERE username = ?";
-        try{
-                PreparedStatement preparedStatement = connection.prepareStatement(updateRoleSql);
-                preparedStatement.setString(1, user.getRole());
-                preparedStatement.setString(2, username);
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(updateRoleSql);
+            preparedStatement.setString(1, user.getRole());
+            preparedStatement.setString(2, username);
 
-                int rowsAffected = preparedStatement.executeUpdate();
+            int rowsAffected = preparedStatement.executeUpdate();
 
-                if(rowsAffected > 0) {
-                    object = new JSONObject();
-                    object.put("Avviso", "Ruolo cambiato con successo");
-                    response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                }
-                else {
-                    object = new JSONObject();
-                    object.put("Avviso", "Si è verificato un errore durante l'operazione");
-                    response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (rowsAffected > 0) {
+                object = new JSONObject();
+                object.put("Avviso", "Ruolo cambiato con successo");
+                response = Response.status(Response.Status.OK).entity(object.toString()).build();
+            } else {
+                object = new JSONObject();
+                object.put("Avviso", "Si è verificato un errore durante l'operazione");
+                response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return response;
     }
@@ -287,13 +276,13 @@ public class UserController {
                     preparedStatement.setString(2, username);
                     int rowsAffected = preparedStatement.executeUpdate();
 
-                    if (rowsAffected>0){
+                    if (rowsAffected > 0) {
                         object = new JSONObject();
-                        object.put("Avviso","Password cambiata con successo");
+                        object.put("Avviso", "Password cambiata con successo");
                         response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                    }else{
+                    } else {
                         object = new JSONObject();
-                        object.put("Avviso","Si è verificato un errore");
+                        object.put("Avviso", "Si è verificato un errore");
                         response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
                     }
                 } else {
@@ -301,7 +290,7 @@ public class UserController {
                     object.put("Avviso", "Password errata");
                     response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
                 }
-            }else {
+            } else {
                 object = new JSONObject();
                 object.put("Avviso", "Si è verificato un errore con il tuo account");
                 response = Response.status(Response.Status.NOT_FOUND).entity(object.toString()).build();
@@ -313,7 +302,7 @@ public class UserController {
         return response;
     }
 
-    public static Response updateUsername(String username, UpdatePasswordOrUsernameModel updateUsername ){
+    public static Response updateUsername(String username, UpdatePasswordOrUsernameModel updateUsername) {
         Connection connection = JDBC.getInstance().getConnection();
         String getOneSql = "SELECT username FROM users WHERE username = ?";
 
@@ -322,14 +311,14 @@ public class UserController {
             preparedStatement.setString(1, username);
             result = preparedStatement.executeQuery();
 
-            if(result.next()){ //Se l'utente è nel DB
-                if(username.equals(updateUsername.getOldValue())){ //Se chi modifica equivale a chi viene modificato
+            if (result.next()) { //Se l'utente è nel DB
+                if (username.equals(updateUsername.getOldValue())) { //Se chi modifica equivale a chi viene modificato
                     //Query per vedere se il nuovo username è già in uso
                     preparedStatement = connection.prepareStatement(getOneSql);
                     preparedStatement.setString(1, updateUsername.getNewValue());
                     result = preparedStatement.executeQuery();
 
-                    if(!result.next()){ // Se nessuno ha quello username posso aggiornarlo
+                    if (!result.next()) { // Se nessuno ha quello username posso aggiornarlo
 
                         String updateUsernameSQL = "UPDATE users SET username = ? WHERE username = ?";
                         preparedStatement = connection.prepareStatement(updateUsernameSQL);
@@ -337,13 +326,13 @@ public class UserController {
                         preparedStatement.setString(2, updateUsername.getOldValue());
                         int rowsAffected = preparedStatement.executeUpdate();
 
-                        if (rowsAffected>0){
+                        if (rowsAffected > 0) {
                             object = new JSONObject();
-                            object.put("Avviso","Username cambiato con successo");
+                            object.put("Avviso", "Username cambiato con successo");
                             response = Response.status(Response.Status.OK).entity(object.toString()).build();
-                        }else{
+                        } else {
                             object = new JSONObject();
-                            object.put("Avviso","Si è verificato un errore");
+                            object.put("Avviso", "Si è verificato un errore");
                             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(object.toString()).build();
                         }
                     } else {
@@ -352,18 +341,18 @@ public class UserController {
                         response = Response.status(Response.Status.CONFLICT).entity(object.toString()).build();
                     }
 
-                }else{
+                } else {
                     object = new JSONObject();
                     object.put("Avviso", "Non hai il permesso per modificare lo username");
                     response = Response.status(Response.Status.UNAUTHORIZED).entity(object.toString()).build();
                 }
 
-            }  else {
+            } else {
                 object = new JSONObject();
                 object.put("Avviso", "Si è verificato un errore con il tuo account");
                 response = Response.status(Response.Status.BAD_REQUEST).entity(object.toString()).build();
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -387,7 +376,6 @@ public class UserController {
         }
         return condition;
     }
-
 
 
 }

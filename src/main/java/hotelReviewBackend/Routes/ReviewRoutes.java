@@ -37,16 +37,10 @@ public class ReviewRoutes {
 
     @PUT
     @Produces("application/json")
-    public Response updateReviewById(@QueryParam("id") String id,@QueryParam("username")String username, ReviewModel review) {
-        return ReviewController.updateReviewById(id, review,username);
+    public Response updateReviewById(@QueryParam("id") String id, ReviewModel review) {
+        return ReviewController.updateReviewById(id, review);
     }
 
-    @PUT
-    @Path("/vote")
-    @Produces("application/json")
-    public Response updateUpvoteOrDownvote(@QueryParam("id") String id, @QueryParam("typevote") String typevote, ReviewModel review) {
-        return ReviewController.updateUpvoteOrDownvote(id, typevote, review);
-    }
 
     @DELETE
     @Produces("application/json")
